@@ -3,6 +3,7 @@ let menuIcon = document.getElementById('menu-icon') || document.querySelector('.
 let navbar = document.querySelector('.menu');
 
 menuIcon.onclick = () => {
+    playClickSound();
     navbar.classList.toggle('active');
     menuIcon.classList.toggle('move');
     bell.classList.remove('active');
@@ -14,6 +15,7 @@ let bellIcon = document.querySelector('#bell-icon');
 
 bellIcon.onclick = (e) => {
     e.stopPropagation();
+    playClickSound();
     bell.classList.toggle('active');
     navbar.classList.remove('active');
     menuIcon.classList.remove('move');
@@ -69,9 +71,392 @@ function trackScroll() {
     document.getElementById('scroll-bar').style.width = scrolled + '%';
 }
 
-// --- Game Store Rich Interactive Functionality ---
+// --- Synthesized Web Audio API Sound System ---
+let soundMuted = true;
+const volumeBtn = document.getElementById('volume-toggle-btn');
 
-// Games Detailed Metadata Database
+function initAudioSystem() {
+    const savedMute = localStorage.getItem('gamestore_muted');
+    if (savedMute === 'false') {
+        soundMuted = false;
+        if (volumeBtn) {
+            volumeBtn.className = 'bx bx-volume-full active';
+        }
+    }
+    
+    if (volumeBtn) {
+        volumeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            soundMuted = !soundMuted;
+            localStorage.setItem('gamestore_muted', soundMuted);
+            
+            if (soundMuted) {
+                volumeBtn.className = 'bx bx-volume-mute';
+                volumeBtn.classList.remove('active');
+            } else {
+                volumeBtn.className = 'bx bx-volume-full active';
+                playChimeSound(); // Play chime when unmuting
+            }
+        });
+    }
+}
+
+// Helper to play clean click synthesis
+function playClickSound() {
+    if (soundMuted) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.08);
+        
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+    } catch(err) {}
+}
+
+// Helper to play brief hover tic
+let lastHoverSoundTime = 0;
+function playHoverSound() {
+    if (soundMuted) return;
+    const now = Date.now();
+    if (now - lastHoverSoundTime < 140) return; // Throttle hover sounds
+    lastHoverSoundTime = now;
+
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1400, ctx.currentTime);
+        osc.frequency.setValueAtTime(1800, ctx.currentTime + 0.01);
+        
+        gain.gain.setValueAtTime(0.02, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.03);
+    } catch(err) {}
+}
+
+// Helper to play double chime double beep (success/enable states)
+function playChimeSound() {
+    if (soundMuted) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const playBeep = (freq, time, duration) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, time);
+            gain.gain.setValueAtTime(0.04, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(time);
+            osc.stop(time + duration);
+        };
+        playBeep(523.25, ctx.currentTime, 0.06); // C5
+        playBeep(659.25, ctx.currentTime + 0.04, 0.10); // E5
+    } catch(err) {}
+}
+
+// Helper to play success swoosh tones (starting download/completing)
+function playSuccessSound() {
+    if (soundMuted) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.25);
+        
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+    } catch(err) {}
+}
+
+// Helper to play negative buzz tone (remove favorites / warnings)
+function playErrorSound() {
+    if (soundMuted) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.setValueAtTime(130, ctx.currentTime + 0.08);
+        
+        gain.gain.setValueAtTime(0.03, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+    } catch(err) {}
+}
+
+// Bind hover sound triggers using dynamic event delegation
+document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('.box') || 
+        e.target.closest('.filter-tab') || 
+        e.target.closest('.nav-icons .bx') || 
+        e.target.closest('.btn') || 
+        e.target.closest('.fav-icon-btn') || 
+        e.target.closest('.navbar a') ||
+        e.target.closest('.download-links a')) {
+        playHoverSound();
+    }
+});
+
+
+// --- Interactive 3D Parallax Card Tilt & Reflection ---
+function initTilt() {
+    const cards = document.querySelectorAll('.box');
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Calculate perspective rotations
+            const rotateX = ((centerY - y) / centerY) * 10; // 10 degrees max
+            const rotateY = ((x - centerX) / centerX) * 10;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+            
+            // Adjust inner glow gradient coordinates
+            const glow = card.querySelector('.box-glow');
+            if (glow) {
+                const pctX = (x / rect.width) * 100;
+                const pctY = (y / rect.height) * 100;
+                glow.style.background = `radial-gradient(circle at ${pctX}% ${pctY}%, rgba(255, 255, 255, 0.06) 0%, transparent 65%)`;
+            }
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+            const glow = card.querySelector('.box-glow');
+            if (glow) {
+                glow.style.background = 'transparent';
+            }
+        });
+    });
+}
+
+
+// --- HTML5 Canvas Interactive Particles System ---
+function initParticles() {
+    const canvas = document.getElementById('particles-canvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+    
+    let mouse = { x: null, y: null, radius: 100 };
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+    window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * 0.25;
+            this.vy = (Math.random() - 0.5) * 0.25;
+            this.radius = Math.random() * 2 + 0.5;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            
+            if (this.x < 0 || this.x > width) this.vx *= -1;
+            if (this.y < 0 || this.y > height) this.vy *= -1;
+            
+            // Mouse push factor
+            if (mouse.x !== null) {
+                let dx = this.x - mouse.x;
+                let dy = this.y - mouse.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < mouse.radius) {
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    this.x += (dx / dist) * force * 1.5;
+                    this.y += (dy / dist) * force * 1.5;
+                }
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(46, 196, 182, 0.12)';
+            ctx.fill();
+        }
+    }
+    
+    function setup() {
+        particles = [];
+        const count = Math.min(60, Math.floor((width * height) / 24000));
+        for (let i = 0; i < count; i++) {
+            particles.push(new Particle());
+        }
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        
+        // Connect close node pairs with faint lines
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                let dx = particles[i].x - particles[j].x;
+                let dy = particles[i].y - particles[j].y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 90) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    let alpha = ((90 - dist) / 90) * 0.04;
+                    ctx.strokeStyle = `rgba(255, 62, 108, ${alpha})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    setup();
+    animate();
+}
+
+
+// --- Responsive Fullscreen Loading Overlay ---
+function initPageLoader() {
+    const loader = document.getElementById('page-loader');
+    if (!loader) return;
+    
+    // Fade out after loaded state animations finish
+    setTimeout(() => {
+        loader.classList.add('fade-out');
+        setTimeout(() => {
+            loader.remove();
+        }, 600);
+    }, 1100);
+}
+
+
+// --- Home Banner Interactive Parallax Effect ---
+function initHeroParallax() {
+    const homeSection = document.getElementById('home');
+    const heroBg = document.getElementById('hero-parallax-bg');
+    const heroText = document.getElementById('hero-parallax-text');
+    
+    if (!homeSection || !heroBg || !heroText) return;
+    
+    homeSection.addEventListener('mousemove', (e) => {
+        const rect = homeSection.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        // Translate image layer and text layer in opposite directions
+        heroBg.style.transform = `scale(1.05) translate(${x * -0.015}px, ${y * -0.015}px)`;
+        heroText.style.transform = `translate(${x * 0.02}px, ${y * 0.02}px)`;
+    });
+    
+    homeSection.addEventListener('mouseleave', () => {
+        heroBg.style.transform = 'scale(1.0) translate(0px, 0px)';
+        heroText.style.transform = 'translate(0px, 0px)';
+    });
+}
+
+
+// --- Dynamic Hover video loop loading ---
+function initCardHoverVideos() {
+    const boxes = document.querySelectorAll('.box');
+    boxes.forEach(box => {
+        let hoverTimeout;
+        let videoContainer;
+
+        box.addEventListener('mouseenter', () => {
+            // Trigger loop play only if hovered for > 150ms to prevent accidental triggers on swipe
+            hoverTimeout = setTimeout(() => {
+                videoContainer = document.createElement('div');
+                videoContainer.className = 'video-preview-container';
+                videoContainer.innerHTML = `
+                    <video src="download-files/Subway Surfers Official.mp4" loop muted playsinline></video>
+                `;
+                box.appendChild(videoContainer);
+                
+                const videoEl = videoContainer.querySelector('video');
+                videoEl.addEventListener('canplay', () => {
+                    videoEl.play();
+                    videoContainer.classList.add('active');
+                });
+            }, 180);
+        });
+
+        box.addEventListener('mouseleave', () => {
+            clearTimeout(hoverTimeout);
+            if (videoContainer) {
+                const currentContainer = videoContainer;
+                currentContainer.classList.remove('active');
+                
+                // Allow opacity transition to complete before removing element
+                setTimeout(() => {
+                    if (currentContainer && currentContainer.parentNode === box) {
+                        const videoEl = currentContainer.querySelector('video');
+                        if (videoEl) videoEl.pause();
+                        currentContainer.remove();
+                    }
+                }, 400);
+                videoContainer = null;
+            }
+        });
+    });
+}
+
+
+// --- Games Detailed Metadata Database ---
 const gamesData = {
     "cyberpunk-2077": {
         title: "Cyberpunk 2077",
@@ -244,7 +629,7 @@ const gamesData = {
     },
     "pubg": {
         title: "PUBG Mobile",
-        genre: "Shooter / Battle Royale",
+        genre: "Shooter / Survival",
         rating: "4.5",
         img: "img/new6.png",
         desc: "Drop in, loot up, and survive. 100 players compete on massive maps in a classic battle royale format where only the last squad standing claims the chicken dinner.",
@@ -327,10 +712,12 @@ function toggleFavorite(id, gameTitle) {
 
     if (favs.includes(id)) {
         favs = favs.filter(item => item !== id);
+        playErrorSound();
         showToast(`Removed "${gameTitle}" from Favorites`, 'error');
     } else {
         favs.push(id);
         isAdded = true;
+        playChimeSound();
         showToast(`Added "${gameTitle}" to Favorites!`, 'success');
     }
     
@@ -359,9 +746,9 @@ function syncFavoriteButtons(id, isFavorited) {
 
     // Update modal favorite button if it's currently open
     const modal = document.getElementById('game-modal');
-    if (modal.classList.contains('active')) {
+    if (modal && modal.classList.contains('active')) {
         const modalFavBtn = document.getElementById('modal-fav-btn');
-        if (modalFavBtn.getAttribute('data-id') === id) {
+        if (modalFavBtn && modalFavBtn.getAttribute('data-id') === id) {
             if (isFavorited) {
                 modalFavBtn.classList.add('active');
                 modalFavBtn.innerHTML = `<i class='bx bxs-heart'></i> Favorited`;
@@ -384,6 +771,7 @@ function initFavorites() {
 const searchInput = document.getElementById('search-input');
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
+        playHoverSound(); // Tick sound for each typing character
         const query = e.target.value.toLowerCase().trim();
         const gridItems = document.querySelectorAll('#new-games-grid .box');
         
@@ -436,6 +824,7 @@ function filterCategory(filter) {
 const filterTabs = document.querySelectorAll('.filter-tab');
 filterTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
+        playClickSound();
         // Clear search input on tab filter change
         if (searchInput) searchInput.value = '';
 
@@ -454,6 +843,8 @@ const closeBtn = document.querySelector('.close-btn');
 function openModal(id) {
     const game = gamesData[id];
     if (!game) return;
+    
+    playClickSound();
 
     document.getElementById('modal-title').innerText = game.title;
     document.getElementById('modal-genre').innerText = game.genre;
@@ -499,6 +890,7 @@ function openModal(id) {
         img.src = imgSrc;
         img.alt = game.title;
         img.onclick = () => {
+            playClickSound();
             document.getElementById('modal-img').src = imgSrc;
         };
         galleryContainer.appendChild(img);
@@ -509,6 +901,7 @@ function openModal(id) {
 }
 
 function closeModal() {
+    playClickSound();
     modal.classList.remove('active');
 }
 
@@ -572,6 +965,7 @@ function simulateDownload(gameId) {
     const game = gamesData[gameId];
     if (!game) return;
 
+    playSuccessSound();
     showToast(`Initializing download for ${game.title}...`, 'success');
     
     // Add dot indicator on bell
@@ -579,6 +973,7 @@ function simulateDownload(gameId) {
 
     // Simulate completion after delay
     setTimeout(() => {
+        playChimeSound();
         showToast(`Successfully downloaded "${game.title}"!`, 'success');
         
         // Add to bell notification log list
@@ -632,11 +1027,18 @@ if (modalDownloadBtn) {
 const downloadQueueBtn = document.getElementById('download-queue-btn');
 if (downloadQueueBtn) {
     downloadQueueBtn.onclick = () => {
+        playClickSound();
         showToast("No active downloads in queue.", 'success');
     };
 }
 
-// Initialize favorites states on page load
+// Initialize all features on DOM Load
 document.addEventListener('DOMContentLoaded', () => {
+    initPageLoader();
+    initAudioSystem();
+    initParticles();
+    initTilt();
+    initHeroParallax();
+    initCardHoverVideos();
     initFavorites();
 });

@@ -15,6 +15,14 @@
     <link rel="stylesheet" href="css/swiper-bundle.min.css">
 </head>
 <body>
+    <!-- Fullscreen Page Loader -->
+    <div class="page-loader" id="page-loader">
+        <div class="loader-content">
+            <div class="loader-logo">Game<span>Store</span></div>
+            <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+        </div>
+    </div>
+
     <!-- Custom Scrollbar -->
     <div class="progress">
         <div class="progress-bar" id="scroll-bar"></div>
@@ -37,6 +45,7 @@
             <div class="nav-icons">
                 <i class='bx bx-bell bx-tada unread' id="bell-icon"><span></span></i>
                 <i class='bx bxs-download' id="download-queue-btn"></i>
+                <i class='bx bx-volume-mute' id="volume-toggle-btn"></i>
                 <div class="menu-icon" id="menu-icon">
                     <div class="line1"></div>
                     <div class="line2"></div>
@@ -71,8 +80,8 @@
 
     <!-- Home Section Starts -->
     <section class="home container" id="home">
-        <img src="img/home.png" alt="City of the Future Banner">
-        <div class="home-text">
+        <img src="img/home.png" alt="City of the Future Banner" id="hero-parallax-bg">
+        <div class="home-text" id="hero-parallax-text">
             <h1>CITY OF THE <br> Future</h1>
             <a href="#" class="btn" data-id="cyberpunk-2077">Available Now</a>
         </div>
@@ -91,6 +100,7 @@
                 <!-- Slide 1 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="cyberpunk-2077">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="cyberpunk-2077"><i class='bx bx-heart'></i></div>
                         <img src="img/trending1.webp" alt="Cyberpunk 2077">
                         <div class="box-text">
@@ -109,6 +119,7 @@
                 <!-- Slide 2 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="battlefield-2042">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="battlefield-2042"><i class='bx bx-heart'></i></div>
                         <img src="img/trending2.jpg" alt="Battlefield 2042">
                         <div class="box-text">
@@ -127,6 +138,7 @@
                 <!-- Slide 3 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="assassins-creed">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="assassins-creed"><i class='bx bx-heart'></i></div>
                         <img src="img/trending3.jpg" alt="Assassin's Creed">
                         <div class="box-text">
@@ -145,6 +157,7 @@
                 <!-- Slide 4 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="ghost-of-tsushima">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="ghost-of-tsushima"><i class='bx bx-heart'></i></div>
                         <img src="img/trending4.jpg" alt="Ghost of Tsushima">
                         <div class="box-text">
@@ -163,6 +176,7 @@
                 <!-- Slide 5 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="gta-v">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="gta-v"><i class='bx bx-heart'></i></div>
                         <img src="img/trending5.png" alt="GTA V">
                         <div class="box-text">
@@ -181,6 +195,7 @@
                 <!-- Slide 6 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="dying-light-2">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="dying-light-2"><i class='bx bx-heart'></i></div>
                         <img src="img/trending6.jpg" alt="Dying Light 2">
                         <div class="box-text">
@@ -199,6 +214,7 @@
                 <!-- Slide 7 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="halo-infinite">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="halo-infinite"><i class='bx bx-heart'></i></div>
                         <img src="img/trending7.png" alt="Halo Infinite">
                         <div class="box-text">
@@ -217,6 +233,7 @@
                 <!-- Slide 8 -->
                 <div class="swiper-slide">
                     <div class="box" data-id="resident-evil-village">
+                        <div class="box-glow"></div>
                         <div class="fav-icon-btn" data-id="resident-evil-village"><i class='bx bx-heart'></i></div>
                         <img src="img/trending8.png" alt="Resident Evil Village">
                         <div class="box-text">
@@ -259,6 +276,7 @@
         <div class="new-content" id="new-games-grid">
             <!--Box 1  -->
             <div class="box" data-id="subway-surfers" data-category="casual">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="subway-surfers"><i class='bx bx-heart'></i></div>
                 <img src="img/new1.jpg" alt="Subway Surfers">
                 <div class="box-text">
@@ -275,6 +293,7 @@
             </div>
             <!--Box 2  -->
             <div class="box" data-id="call-of-duty-mobile" data-category="shooter">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="call-of-duty-mobile"><i class='bx bx-heart'></i></div>
                 <img src="img/new2.jpg" alt="Call of Duty: Mobile">
                 <div class="box-text">
@@ -291,6 +310,7 @@
             </div> 
             <!--Box 3  -->
             <div class="box" data-id="free-guy" data-category="action">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="free-guy"><i class='bx bx-heart'></i></div>
                 <img src="img/new3.jpg" alt="Free Guy">
                 <div class="box-text">
@@ -307,6 +327,7 @@
             </div>
             <!--Box 4  -->
             <div class="box" data-id="clash-royale" data-category="strategy">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="clash-royale"><i class='bx bx-heart'></i></div>
                 <img src="img/new4.jpg" alt="Clash Royale">
                 <div class="box-text">
@@ -323,6 +344,7 @@
             </div>
             <!--Box 5  -->
             <div class="box" data-id="minecraft" data-category="survival">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="minecraft"><i class='bx bx-heart'></i></div>
                 <img src="img/new5.png" alt="Minecraft">
                 <div class="box-text">
@@ -339,6 +361,7 @@
             </div>
             <!--Box 6  -->
             <div class="box" data-id="pubg" data-category="shooter">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="pubg"><i class='bx bx-heart'></i></div>
                 <img src="img/new6.png" alt="PUBG Mobile">
                 <div class="box-text">
@@ -355,6 +378,7 @@
             </div>
             <!--Box 7  -->
             <div class="box" data-id="fortnite" data-category="shooter">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="fortnite"><i class='bx bx-heart'></i></div>
                 <img src="img/new7.png" alt="Fortnite">
                 <div class="box-text">
@@ -371,6 +395,7 @@
             </div> 
             <!--Box 8  -->
             <div class="box" data-id="marvel-contest-of-champions" data-category="action">
+                <div class="box-glow"></div>
                 <div class="fav-icon-btn" data-id="marvel-contest-of-champions"><i class='bx bx-heart'></i></div>
                 <img src="img/new8.jpg" alt="Marvel Contest of Champions">
                 <div class="box-text">
@@ -439,6 +464,9 @@
 
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Particles Background Canvas -->
+    <canvas id="particles-canvas"></canvas>
 
     <!-- Link Swiper File -->
     <script src="js/swiper-bundle.min.js"></script>

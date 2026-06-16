@@ -17,6 +17,14 @@
 </head>
 
 <body>
+    <!-- Fullscreen Page Loader -->
+    <div class="page-loader" id="page-loader">
+        <div class="loader-content">
+            <div class="loader-logo">Game<span>Store</span></div>
+            <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+        </div>
+    </div>
+
     <!-- Custom Scrollbar -->
     <div class="progress">
         <div class="progress-bar" id="scroll-bar"></div>
@@ -39,6 +47,7 @@
             <div class="nav-icons">
                 <i class='bx bx-bell bx-tada unread' id="bell-icon"><span></span></i>
                 <i class='bx bxs-download' id="download-queue-btn"></i>
+                <i class='bx bx-volume-mute' id="volume-toggle-btn"></i>
                 <div class="menu-icon" id="menu-icon">
                     <div class="line1"></div>
                     <div class="line2"></div>
@@ -110,6 +119,9 @@
 
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Particles Background Canvas -->
+    <canvas id="particles-canvas"></canvas>
 
     <!-- Link Swiper File -->
     <script src="js/swiper-bundle.min.js"></script>
